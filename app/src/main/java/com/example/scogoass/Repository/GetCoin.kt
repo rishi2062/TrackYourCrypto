@@ -20,6 +20,8 @@ class GetCoin @Inject constructor(private val api : coinService ) {
         }catch(e:Exception){
             Log.d("Error in Coin List" , e.stackTrace.toString())
         }
+        val arr = response as ListCoins
+        Log.d("SuccessData" , "$arr")
         return response as ListCoins
     }
 

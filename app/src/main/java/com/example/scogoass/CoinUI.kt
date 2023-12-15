@@ -55,6 +55,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavController
 import coil.compose.ImagePainter
+import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.scogoass.ViewModel.CoinViewModel
 import com.example.scogoass.model.CoinData
@@ -188,14 +189,7 @@ fun EachCoinDetail(
     ){
         Column {
             Image(
-                painter = rememberImagePainter(
-                    data = entry.image,
-                    builder = {
-                        // Optional: Add image transformations
-                       // placeholder(Color.Gray)
-                        error(Color.Red)
-                    }
-                ),
+                painter = rememberAsyncImagePainter(model = entry.image),
                 contentDescription = entry.name,
                 modifier = modifier
                     .size(120.dp)

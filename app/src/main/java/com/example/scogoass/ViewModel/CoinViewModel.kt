@@ -22,17 +22,17 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CoinViewModel @Inject constructor(
-    val repo : GetCoin
+    private val repo : GetCoin
 ) : ViewModel() {
 
-    val coinList by lazy { mutableStateOf<List<CoinData>>(listOf())}
+    val coinList = mutableStateOf<List<CoinData>>(listOf())
     var loadError = mutableStateOf("")
     var isLoading = mutableStateOf(false)
 
     init {
         loadCoinDetail()
     }
-    fun loadCoinDetail(){
+    private fun loadCoinDetail(){
         viewModelScope.launch {
             val result = repo.getCoinData()
             if(result.size!=0) {
