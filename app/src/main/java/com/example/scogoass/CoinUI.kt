@@ -3,6 +3,8 @@ package com.example.scogoass
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Arrangement.Absolute.Center
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -189,11 +191,20 @@ fun EachCoinDetail(
     ){
         Column {
             Image(
-                painter = rememberAsyncImagePainter(model = entry.image),
+                painter = rememberAsyncImagePainter(model = entry.image,
+                    onSuccess = {
+                        val drawable = it.result.drawable
+                        viewModel.calcBackGroundColor(drawable) { color ->
+                            backColor = color
+                        }
+                    }),
                 contentDescription = entry.name,
+
                 modifier = modifier
                     .size(120.dp)
-                    .align(Alignment.CenterHorizontally))
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 10.dp)
+                    .padding(10.dp))
 //            ) {
 ////                CircularProgressIndicator(
 ////                    modifier = Modifier.scale(0.5f),
@@ -201,11 +212,11 @@ fun EachCoinDetail(
 ////                )
 //            }
             Text(
-                text = entry.image,
+                text = entry.name,
                 fontFamily = FontFamily.SansSerif,
                 fontSize = 20.sp,
                 textAlign = TextAlign.Center,
-                modifier = modifier.fillMaxWidth()
+                modifier = modifier.fillMaxWidth().padding(top = 10.dp)
             )
         }
     }
