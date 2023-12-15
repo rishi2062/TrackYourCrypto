@@ -16,6 +16,7 @@ import androidx.palette.graphics.Palette
 import com.example.scogoass.Repository.GetCoin
 import com.example.scogoass.model.CoinData
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -26,23 +27,55 @@ class CoinViewModel @Inject constructor(
 ) : ViewModel() {
 
     val coinList = mutableStateOf<List<CoinData>>(listOf())
+
     var loadError = mutableStateOf("")
     var isLoading = mutableStateOf(false)
+    private var searchedList = listOf<CoinData>()
+    private var isStartingSearch = true
+    var isSearching = mutableStateOf(false)
 
     init {
+        // coinList.value.slice(0..50000)
         loadCoinDetail()
+        //coinList.value = coinList.value.subList(0,50000)
     }
-    private fun loadCoinDetail(){
+
+    fun searchList(query: String) {
+        val listToSearch = if (isStartingSearch) {
+            coinList.value
+        } else {
+            searchedList
+        }
+        viewModelScope.launch(Dispatchers.Default) {
+            if (query.isEmpty()) {
+                coinList.value = searchedList
+                isSearching.value = false
+                isStartingSearch = true
+                return@launch
+            } else {
+                val results = listToSearch.filter {
+                    it.name.contains(query.trim(), ignoreCase = true)
+                }
+                if (isStartingSearch) {
+                    searchedList = coinList.value
+                    isStartingSearch = false
+                }
+                coinList.value = results
+                isSearching.value = true
+            }
+        }
+    }
+
+    fun loadCoinDetail() {
         viewModelScope.launch {
             val result = repo.getCoinData()
-            if(result.size!=0) {
+            if (result.size != 0) {
                 val coinEntries = result.mapIndexed { index, coins ->
                     val url = "https://static.coinpaprika.com/coin/${coins.id}/logo.png"
                     CoinData(coins.name.capitalize(java.util.Locale.ROOT), url, coins.id)
                 }
                 coinList.value += coinEntries
-            }
-            else{
+            } else {
                 loadError.value = "Error"
                 isLoading.value = false
             }

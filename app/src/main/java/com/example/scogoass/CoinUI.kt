@@ -25,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.materialIcon
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -70,7 +71,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 
 @Composable
 fun CoinScreen(
-    navController : NavController
+    navController: NavController,
+    viewModel: CoinViewModel = hiltViewModel()
 ){
     Surface(color = Color.LightGray, modifier = Modifier.fillMaxSize()) {
         Column{
@@ -79,7 +81,7 @@ fun CoinScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)){
-
+                viewModel.searchList(it)
             }
             Spacer(modifier = Modifier.height(16.dp))
             ShowList(navController = navController)
@@ -119,6 +121,10 @@ fun SearchBar(modifier: Modifier = Modifier,
                 .shadow(5.dp, CircleShape)
                 .background(Color.White)
                 .padding(horizontal = 20.dp, vertical = 12.dp)
+                .onFocusChanged {
+                    isHintDisplayed = it.isFocused != text.isNotEmpty()
+
+                }
 
         )
         if(isHintDisplayed){
@@ -137,7 +143,7 @@ fun SearchBar(modifier: Modifier = Modifier,
 fun ShowList(
     navController: NavController,
     viewModel: CoinViewModel = hiltViewModel()
-){
+) {
     val coinList by remember {
         viewModel.coinList
     }
@@ -147,16 +153,35 @@ fun ShowList(
     val isLoading by remember {
         viewModel.isLoading
     }
+    val isSearching by remember {
+        viewModel.isSearching
+    }
 
-    LazyColumn(contentPadding = PaddingValues(16.dp)){
-        val itemCount = if(coinList.size%2==0){
-            coinList.size/2
+    LazyColumn(contentPadding = PaddingValues(16.dp)) {
+        val itemCount = if (coinList.size % 2 == 0) {
+            coinList.size / 2
+        } else {
+            coinList.size / 2 + 1
         }
-        else{
-            coinList.size/2 + 1
-        }
-        items(itemCount){
+        items(itemCount) {
+            if (!isLoading && !isSearching) {
+                viewModel.loadCoinDetail()
+            }
             CoinRow(idx = it, entries = coinList, navController = navController)
+        }
+    }
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        if (isLoading) {
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+        }
+        if (loadError.isNotEmpty()) {
+            RetrySection(error = loadError) {
+                viewModel.loadCoinDetail()
+            }
         }
     }
 }
@@ -216,7 +241,9 @@ fun EachCoinDetail(
                 fontFamily = FontFamily.SansSerif,
                 fontSize = 20.sp,
                 textAlign = TextAlign.Center,
-                modifier = modifier.fillMaxWidth().padding(top = 10.dp)
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp)
             )
         }
     }
@@ -240,12 +267,31 @@ fun CoinRow(
                     navController = navController,
                     modifier = Modifier.weight(1f)
                 )
-            }
-            else{
+            } else {
                 Spacer(modifier = Modifier.weight(1f))
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+
+
+@Composable
+fun RetrySection(
+    error: String,
+    onRetry: () -> Unit
+) {
+    Column {
+        Text(error, color = Color.Red, fontSize = 18.sp)
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(
+            onClick = {
+                onRetry()
+            },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Text(text = "Retry...")
+        }
     }
 }
 

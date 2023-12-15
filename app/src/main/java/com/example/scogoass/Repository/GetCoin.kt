@@ -15,13 +15,14 @@ import javax.inject.Inject
 @ActivityScoped
 class GetCoin @Inject constructor(private val api : coinService ) {
     suspend fun getCoinData() : ListCoins {
-        val response = try{
+        val response = try {
             api.getCoinData()
-        }catch(e:Exception){
-            Log.d("Error in Coin List" , e.stackTrace.toString())
+        } catch (e: Exception) {
+            Log.d("Error in Coin List", e.stackTrace.toString())
         }
-        val arr = response as ListCoins
-        Log.d("SuccessData" , "$arr")
+//        val arr = response as ListCoins
+//        Log.d("SuccessData" , "$arr")
+
         return response as ListCoins
     }
 
