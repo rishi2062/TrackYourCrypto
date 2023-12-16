@@ -92,8 +92,6 @@ dependencies {
 
     // To use Kotlin annotation processing tool (kapt)
 
-
-    // To use Kotlin Symbol Processing (KSP)
     kapt("androidx.room:room-compiler:2.6.1")
 
     implementation("com.google.dagger:dagger:2.49")
@@ -108,25 +106,15 @@ dependencies {
     //Dagger - Hilt
     implementation("com.google.dagger:hilt-android:2.49")
     kapt("com.google.dagger:hilt-android-compiler:2.49")
-  //  implementation("androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03")
+    //  implementation("androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03")
     kapt("androidx.hilt:hilt-compiler:1.1.0")
     implementation("androidx.hilt:hilt-navigation:1.1.0")
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
     implementation("androidx.hilt:hilt-navigation-fragment:1.1.0")
-//// Dagger Android
-//    api("com.google.dagger:dagger-android:2.49")
-//    api("com.google.dagger:dagger-android-support:2.49")
-//    kapt("com.google.dagger:dagger-android-processor:2.49")
-//
-//// Dagger - Hilt
-//    implementation("com.google.dagger:hilt-android:2.49")
-//    kapt("com.google.dagger:hilt-android-compiler:2.49")
-//
-//    implementation("androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03")
-//    kapt("androidx.hilt:hilt-compiler:1.1.0")
-//    implementation("androidx.room:room-ktx:2.6.1")
-//    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
-//    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
+
+    // pagination
+    val paging_version = "3.2.1"
+    implementation("androidx.paging:paging-runtime:$paging_version")
     // ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
     // ViewModel utilities for Compose

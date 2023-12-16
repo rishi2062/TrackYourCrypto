@@ -1,10 +1,10 @@
 package com.example.scogoass
 
+//import com.google.accompanist.coil.CoilImage
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Arrangement.Absolute.Center
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -22,16 +22,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.materialIcon
-import androidx.compose.material.icons.outlined.Email
-import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,33 +43,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavController
-import coil.compose.ImagePainter
+import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
 import com.example.scogoass.ViewModel.CoinViewModel
 import com.example.scogoass.model.CoinData
-import com.example.scogoass.model.CoinDetail
-import com.example.scogoass.model.Coins
-//import com.google.accompanist.coil.CoilImage
-import coil.compose.rememberImagePainter
-import dagger.hilt.android.lifecycle.HiltViewModel
 
 
 @Composable
@@ -76,19 +69,22 @@ fun CoinScreen(
 ){
     Surface(color = Color.LightGray, modifier = Modifier.fillMaxSize()) {
         Column{
-            Spacer(modifier = Modifier.height(20.dp))
-            SearchBar(hint = "Search",
+            Spacer(modifier = Modifier.height(5.dp))
+            SearchBar(
+                hint = "Search",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)){
+                    .padding(16.dp)
+            ) {
                 viewModel.searchList(it)
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             ShowList(navController = navController)
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchBar(modifier: Modifier = Modifier,
               hint : String = "",
@@ -100,40 +96,40 @@ fun SearchBar(modifier: Modifier = Modifier,
         mutableStateOf(hint!="")
     }
 
-    Box(modifier = modifier.padding(10.dp)){
-        BasicTextField(value = text, onValueChange = {
-            text = it
-            onSearch(it)
-//            Icon(
-//                imageVector = Icons.Outlined.Email,
-//                contentDescription = null
-//            )
-//
-//            materialIcon(
-//                "Search",
-//                ImageVector = Icons.Rounded.Search,
-//            )
-        },
-            singleLine = true,
-            textStyle = TextStyle(color = Color.Black),
-            modifier = Modifier
-                .fillMaxWidth()
-                .shadow(5.dp, CircleShape)
-                .background(Color.White)
-                .padding(horizontal = 20.dp, vertical = 12.dp)
-                .onFocusChanged {
-                    isHintDisplayed = it.isFocused != text.isNotEmpty()
+    Box(modifier = modifier.padding(10.dp)) {
 
-                }
+        Row {
 
-        )
-        if(isHintDisplayed){
-            Text(
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
-                text = hint,
-                color = Color.Black
+            OutlinedTextField(
+                value = text, onValueChange = {
+                    text = it
+                    onSearch(it)
+                },
+                leadingIcon = {
+                    Icon(
+                        Icons.Filled.Search,
+                        contentDescription = "Search"
+                    )
+                },
+                label = {
+                    Text(text = "Search Coin", color = Color.Black)
+                },
+                shape = RoundedCornerShape(25.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color.Gray,
+                    unfocusedBorderColor = Color.Black,
+                ),
+                singleLine = true,
+                textStyle = TextStyle(color = Color.Black),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 5.dp)
+                    .padding(1.dp)
+
             )
         }
+
+
     }
 
 }
@@ -156,6 +152,9 @@ fun ShowList(
     val isSearching by remember {
         viewModel.isSearching
     }
+    val endReached by remember {
+        viewModel.endReached
+    }
 
     LazyColumn(contentPadding = PaddingValues(16.dp)) {
         val itemCount = if (coinList.size % 2 == 0) {
@@ -164,7 +163,7 @@ fun ShowList(
             coinList.size / 2 + 1
         }
         items(itemCount) {
-            if (!isLoading && !isSearching) {
+            if (it >= itemCount - 1 && !endReached && !isLoading && !isSearching) {
                 viewModel.loadCoinDetail()
             }
             CoinRow(idx = it, entries = coinList, navController = navController)
@@ -216,26 +215,28 @@ fun EachCoinDetail(
     ){
         Column {
             Image(
-                painter = rememberAsyncImagePainter(model = entry.image,
+                painter = rememberAsyncImagePainter(
+                    model = entry.image,
                     onSuccess = {
                         val drawable = it.result.drawable
                         viewModel.calcBackGroundColor(drawable) { color ->
                             backColor = color
                         }
-                    }),
-                contentDescription = entry.name,
 
+                    },
+
+                    contentScale = ContentScale.Crop,
+
+                    ),
+
+                contentDescription = entry.name,
                 modifier = modifier
                     .size(120.dp)
                     .align(Alignment.CenterHorizontally)
                     .padding(top = 10.dp)
-                    .padding(10.dp))
-//            ) {
-////                CircularProgressIndicator(
-////                    modifier = Modifier.scale(0.5f),
-////                    color = MaterialTheme.colorScheme.primary
-////                )
-//            }
+                    .padding(10.dp)
+            )
+
             Text(
                 text = entry.name,
                 fontFamily = FontFamily.SansSerif,
